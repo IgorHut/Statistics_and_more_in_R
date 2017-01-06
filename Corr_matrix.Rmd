@@ -1,0 +1,114 @@
+---
+title: "Correlation tests and correlation matrix in R"
+author: Igor Hut
+date: '`r format(Sys.time(), "%d %B, %Y")`'
+output: html_notebook
+---
+
+**The following content is mostly based on the material that can be found at <http://www.sthda.com/>**
+
+
+### Install and load required R packages
+
+We'll use the `ggpubr` R package for an easy ggplot2-based data visualization:
+```{r, message=FALSE, warning=FALSE}
+library(ggpubr)
+```
+
+## Methods for correlation analyses
+
+There are different methods to perform correlation analysis:
+
+- **Pearson correlation (r)**, which measures a linear dependence between two variables (x and y). It's also known as a parametric correlation test because it depends to the distribution of the data. It can be used only when x and y are from normal distribution. The plot of *y = f(x)* is named the *linear regression curve*.
+
+- **Kendall $\tau$** and **Spearman $\rho$**, which are rank-based correlation coefficients (non-parametric)
+
+- **The most commonly used method is the Pearson correlation method**
+
+## Compute correlation in R
+
+### R functions
+
+Correlation coefficients can be computed in R by using the functions `cor()` and `cor.test()`:
+
+> 
+- `cor()` computes the correlation coefficient
+- `cor.test()` test for association/correlation between paired samples. It returns both the correlation coefficient and the significance level(or p-value) of the correlation.
+
+The simplified formats are:
+```{r, eval=FALSE, message=FALSE}
+cor(x, y, method = c("pearson", "kendall", "spearman"))
+cor.test(x, y, method=c("pearson", "kendall", "spearman"))
+```
+
+where:
+
+> 
+- x, y: numeric vectors with the same length
+- method: correlation method
+
+
+**If the data contain missing values, the following R code can be used to handle missing values by case-wise deletion:**
+```{r, eval=FALSE}
+cor(x, y,  method = "pearson", use = "complete.obs")
+```
+
+## Examples
+
+We'll use the well known built-in `mtcars` R dataset.
+```{r}
+head(mtcars)
+```
+
+> We'd like to compute the correlation between `mpg` and `wt` variables.
+
+**First let's visualise our data by the means of a scatter plot. We'll be using `ggpubr` R package**
+
+```{r}
+library(ggpubr)
+
+my_data <- mtcars
+my_data$cyl <- factor(my_data$cyl)
+str(my_data)
+
+ggscatter(my_data, x = "wt", y = "mpg",
+          add = "reg.line", conf.int = TRUE,
+          cor.coef = TRUE, cor.method = "pearson",
+          xlab = "Weight (1000 lbs)", ylab = "Miles/ (US) gallon")
+```
+
+### Preleminary test to check the test assumptions
+
+1. Is the relation between variables linear? Yes, from the plot above, the relationship can be, closely enough, modeled as linear. In the situation where the scatter plots show curved patterns, we are dealing with nonlinear association between the two variables.
+
+2. Are the data from each of the 2 variables (x, y) following a normal distribution?
+    - Use *Shapiro-Wilk* normality test -> R function: `shapiro.test()` 
+    - and look at the normality plot -> R function: `ggpubr::ggqqplot()`
+
+- *Shapiro-Wilk* test can be performed as follow:
+    - Null hypothesis: the data are normally distributed
+    - Alternative hypothesis: the data are not normally distributed
+    
+```{r}
+# Shapiro-Wilk normality test for mpg
+shapiro.test(my_data$mpg) # => p = 0.1229
+
+# Shapiro-Wilk normality test for wt
+shapiro.test(my_data$wt) # => p = 0.09
+```
+*As can be seen from the output, the two p-values are greater than the predetermined significance level of 0.05 implying that the distribution of the data are not significantly different from normal distribution. In other words, we can assume the normality.*
+
+- One more option for checking the normality of the data distribution is visual inspection of the Q-Q plots (quantile-quantile plots). Q-Q plot draws the correlation between a given sample and the theoretical normal distribution.
+
+Again, we'll use the `ggpubr` R package to obtain "pretty", i.e. publishing-ready, Q-Q plots.
+
+```{r}
+library("ggpubr")
+# Check for the normality of "mpg""
+ggqqplot(my_data$mpg, ylab = "MPG")
+
+# Check for the normality of "wt""
+ggqqplot(my_data$wt, ylab = "WT")
+```
+
+*From the Q-Q normality plots, we can assume that both samples may come from populations that, closely enough, follow normal distributions.*
