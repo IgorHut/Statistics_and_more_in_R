@@ -1,0 +1,224 @@
+---
+title: 'Eksplorativna analiza podataka (Exploratory Data Analysis - EDA) u R-u: Studija
+  slucaja - UN Voting Dataset'
+author: "Igor Hut"
+date: '`r format(Sys.time(), "%d %B, %Y")`'
+output:
+  html_document:
+    toc: yes
+    toc_depth: 4
+  html_notebook: default
+  pdf_document:
+    toc: yes
+    toc_depth: 4
+---
+
+## Uvodna razmatranja
+
+- Izvor: *Erik Voeten, "Data and Analyses of Voting in the UN General Assembly"*
+- Svi podaci su dostupni u okviru R paketa "unvote": <https://cran.r-project.org/web/packages/unvotes/>
+- Kao i u GitHub repozitorujumu: <https://github.com/dgrtwo/unvotes>
+- Sadrzani podaci se odnose na istoriju glasanja zemalja clanica na Generalnoj skupstini Ujedinjenih nacija. Date su informacije o datumu glasanja, temi o kojoj se glasalo i kako je svaka od zemalja glasala. 
+
+### Setovi podataka
+
+`unvotes` R paket sadrzi tri seta podataka u formi data frame-a (preciznije tbl_df, odn. tibble, sto obezbedjuje bolje formatiranje pri njihovom ispisivanju). Prvi set podataka, `un_votes` se odnosi na istoriju glasanja svake od zemalja. Svaka vrsta sadrzi country/vote par:
+
+```{r}
+library(dplyr)
+library(unvotes)
+
+str(un_votes)
+un_votes
+```
+
+
+Paket takodje sadrzi i set podataka sa informacijama o svakom javnom glasanju, ukljucujuci datum, opis, i rezoluciju o kojoj je glasano:
+
+```{r}
+un_roll_calls
+```
+
+Konacno `un_roll_call_issues` set podataka sadrzi informacije o medjusobnoj povezanosti razlicitih glasanja kao i o 6 generalnih problema o kojima je glasano u Gen. skupstini UN-a:
+
+```{r}
+un_roll_call_issues
+
+count(un_roll_call_issues, issue, sort = TRUE)
+```
+
+Za vise informacija o svakom od pojedinacnih setova podataka koristite naredbu `help()`.
+
+## Priprema podataka za analizu
+
+Za pocetak cemo da izvrsimo "inner join" za setove `un_votes` i `un_roll_calls` a na osnovu zajednicke kolone `rcid`. Na ovaj nacin dobijamo objedinjen set podataka sa vecinom informacija relevantnih za dalju eksplorativnu analizu. 
+
+```{r}
+joined <- inner_join(un_votes, un_roll_calls, by = "rcid")
+
+joined
+```
+
+## Eksplorativna analiza
+
+#### Koliko ukupno ima glasova, za sva glasanja i sve godine, i koliko je procentualno bilo glasova "za" u odnosu na ukupan broj glasova?
+```{r}
+summarise(joined, total = n(), percent_yes = mean(vote == "yes"))
+```
+
+#### Kako su glasale pojedinacne zemlje, u proseku, tokom istorije Gen. skupstine UN?
+
+```{r}
+by_country <- joined %>%
+    group_by(country) %>% 
+    summarise(n_votes = n(),
+            percent_yes = mean(vote == "yes"))
+
+# Print the by_country dataset
+by_country
+
+arrange(by_country, percent_yes)
+
+arrange(by_country, desc(percent_yes))
+
+arrange(by_country, n_votes)
+
+```
+
+Moze se primetiti da ima nekoliko zemalja koje su znacajno manje puta ucestvovale u glasanju od ostalih (Zanzibar, Kiribati, South Sudan). Ove zemlje i podatke vezane za njih cemo izostatiti iz buduce analize. Filterujemo set podataka tako da izostavimo sve zemlje koje su glasale manje od 100 puta:
+```{r}
+by_country %>%
+filter( n_votes > 100) %>%
+  arrange(percent_yes)
+```
+
+#### Kako se menjao generalni trend glasanja kroz istoriju?
+
+```{r}
+library(lubridate)
+
+by_year <- joined %>%
+  group_by(year = year(date)) %>%
+  summarize(n_votes = n(),
+            percent_yes = mean(vote == "yes")) %>% 
+  filter( n_votes > 100)
+
+by_year
+
+# Da vizualizujemo ovaj trend pomocu linijskog grafika
+library(ggplot2)
+
+ggplot(by_year, aes(x = year, y = percent_yes)) +
+  geom_line()
+
+# Scatter plot + geom_smooth
+
+ggplot(by_year, aes( year, percent_yes)) +
+  geom_point() +
+  geom_smooth()
+
+```
+
+Zanimljiv trend. Neposredno nakon nakon zavrsetka Drugog svetskog rata su evidentno postojale ostre nesuglasice po mnogim pitanjima. U periodu od 80-tih godina proslog veka, pa sve do skoro, deluje kao da je postojao, gotovo, koncenzus po mnogim pitanjima, medju vecinom clanica Gen. skupstine UN.
+
+
+#### Koliko cesto je svaka od zemalja glasala "za" po godinama?
+
+```{r}
+library(lubridate)
+
+by_year_country <- joined %>% 
+  group_by( year = year(date), country) %>% 
+  summarise(n_votes = n(), percent_yes = mean(vote == "yes"))
+
+by_year_country
+```
+
+#### Kako su kroz istoriju glasale, SAD, SSSR, Rusija, Jugoslavija, Srbija i  Hrvatska? 
+
+Proverimo prvo da li ima svih ovih zemalja u setu:
+```{r}
+country <- distinct(by_country, country) %>% 
+  arrange(country)
+View(country)
+
+inner_join(country, data.frame(country = c("Serbia", "Croatia", "United States", "Russian Federation", "Yugoslavia", "Soviet Union")))
+```
+Izgleda da nema ni Srbije ni SSSR-a. Posmatracemo Jugoslaviju, Rusiju, Hrvatsku i SAD:
+
+```{r}
+filt_countries <- filter(by_year_country, country %in% c("Croatia", "United States", "Russian Federation", "Yugoslavia"))
+
+filt_countries
+
+ggplot(filt_countries, aes(x = year, y = percent_yes, col = country)) +
+  geom_point() +
+  geom_smooth(se = FALSE)
+
+```
+
+**Evidentno da su opservacije za Srbiju, Srbiju i Crnu Goru i Jugoslavuju deklarisane kao "Yugoslavia" a za Rusiju i SSSR kao "Russian Federation". 
+Zanimljivo, a donekle i ocekivano, generalni trend glasanja Ruske Federacije i Jugoslavije/ Srbije su prilicno pozitivno korelisani tokom istorije, dok je situacija sa SAD upravo suprotna. Zarad podrobnije komparacije tokom poslednje dve decenije posmatracemo samo period od 1990-te do 2014-te godine.**
+
+```{r}
+
+# Samo da jos jednom proverimo raspone vrednosti, pre svega za var. "year"
+summary(filt_countries)
+
+ggplot(filt_countries, aes(x = year, y = percent_yes, col = country)) +
+  geom_point() +
+  geom_smooth(se = FALSE) +
+  scale_x_continuous(limits = c(1990, 2014))
+
+ggplot(filt_countries, aes(x = year, y = percent_yes)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  scale_x_continuous(limits = c(1990, 2014)) +
+  facet_wrap( ~ country)
+```
+
+**Posmatrajuci izolovan samo period 1990-2014 god. mozemo uociti, mozda malo neocekivano, da su Srbija, Ruska Federacija i Hrvatska imale procentualno mnogo vise glasova "za" od SAD, te da se trend glasanja ove tri zemlje prilicno poklapa u datom periodu. Sta vise ovo pogotovo vazi za Hrvatsku i Rusku Federaciju. Naravno potrebno je dataljnije utvrditi kako je glasano za pojedinacne rezolucije pre nego sto izvucemo bilo kakve zakljucke.**
+
+#### Kako je svaka od izabranih zemalja glasala tokom vremena o generalnim problemima sadrzanim u `un_roll_call_issues?
+
+Prvo da proverimo o kojim se problemima tacno radi:
+```{r}
+distinct(un_roll_call_issues, issue)
+```
+
+Nazalost u ovom setu nema podataka o glasanjima koja su se direktno ticala politickih desavanaja na prostoru bivse Jugoslavije, sto bi nama bilo posebno zanimljivo. Elem, nastavimo sa analizom:
+```{r}
+joined %>%
+  filter(country %in% c("Croatia", "United States", "Russian Federation", "Yugoslavia")) %>%
+  inner_join(un_roll_call_issues, by = "rcid") %>%
+  group_by(year = year(date), country, issue) %>%
+  summarize(votes = n(),
+            percent_yes = mean(vote == "yes")) %>%
+  filter(votes > 5) %>%
+  ggplot(aes(year, percent_yes, col = country)) +
+  geom_point() +
+  geom_smooth(se = FALSE) +
+  facet_wrap(~ issue)
+
+
+#Da probamo i sa drugacijim rasporedom
+joined %>%
+  filter(country %in% c("Croatia", "United States", "Russian Federation", "Yugoslavia")) %>%
+  inner_join(un_roll_call_issues, by = "rcid") %>%
+  group_by(year = year(date), country, issue) %>%
+  summarize(votes = n(),
+            percent_yes = mean(vote == "yes")) %>%
+  filter(votes > 5) %>%
+  ggplot(aes(year, percent_yes, col = issue)) +
+  geom_point() +
+  geom_smooth(se = FALSE) +
+  facet_wrap(~ country)
+
+
+
+
+```
+
+
+
+U nastavku ce biti sprovedena korelaciona analiza, regresiona analiza, kao i detaljna graficka analiza za odabrane zemlje i njihovo glasanje u Gen. skupstini UN a u svetlu razlicitih kriterijuma...
