@@ -1,0 +1,4 @@
+Idealpoints.tab (text/tab-separated-values) 2295497 bytes.
+RawVotingdata.tab (text/tab-separated-values) 20573997 bytes.
+Dyadicdata.tab (text/tab-separated-values) 161594277 bytes.
+descriptionsnew.xls (application/vnd.ms-excel) 1751040 bytes.

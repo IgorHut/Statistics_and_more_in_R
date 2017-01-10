@@ -3,20 +3,25 @@ title: "Correlation tests and correlation matrix in R"
 author: "Igor Hut"
 date: '`r format(Sys.time(), "%d %B, %Y")`'
 output:
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
+  html_notebook: default
   html_document:
     toc: yes
     toc_depth: 3
-  html_notebook: default
 ---
 
-**The following content is mostly based on the material that can be found at <http://www.sthda.com/>, as well as in the vignette for `corrplot` R package - [An Introduction to corrplot Package](https://cran.r-project.org/web/packages/corrplot/vignettes/corrplot-intro.html)**
+**The following content is mostly based on the material that can be found at <http://www.sthda.com/>, as well as in the vignette for `corrplot` R package - [An Introduction to corrplot Package](https://cran.r-project.org/web/packages/corrplot/vignettes/corrplot-intro.html). Since I'm a huge fan of Hadley Wickham's work I'll insist on solutions based in ["tidyverse"](https://blog.rstudio.org/2016/09/15/tidyverse-1-0-0/) whenewer possible...**
 
 
 ### Install and load required R packages
 
-We'll use the `ggpubr` R package for an easy ggplot2-based data visualization and `corrplot` package to plot correlograms:
+We'll use the `ggpubr` R package for an easy ggplot2-based data visualization, `corrplot` package to plot correlograms, `Hmisc` to calculate correlation matrices containing both cor. coefs. and p-values, and of course `tidyverse` for all the data wrangling, plotting and alike:
 ```{r, message=FALSE, warning=FALSE}
 library(ggpubr)
+library(tidyverse)
+library(Hmisc)
 ```
 
 ## Methods for correlation analyses
@@ -213,3 +218,91 @@ If your data contain missing values, the following R code can be used to handle 
 cor(x, method = "pearson", use = "complete.obs")
 ```
 
+### Plain correlation matrix
+**Example:**
+```{r}
+library(dplyr)
+
+my_data <- select(mtcars, mpg, disp, hp, drat, wt, qsec)
+head(my_data)
+
+#Let's compute the correlation matrix
+cor_1 <- round(cor(my_data), 2)
+cor_1
+
+```
+
+Unfortunately, the function `cor()` returns only the correlation coefficients between variables. In the next section, we will use `Hmisc` R package to calculate the correlation *p-values*.
+
+### Correlation matrix with significance levels (p-value)
+
+The function `rcorr()` (in `Hmisc` package) can be used to compute the significance levels for pearson and spearman correlations. It returns both the *correlation coefficients* and the *p-value* of the correlation for all possible pairs of columns in the data table.
+
+**Simplified format:**
+```{r, eval=FALSE, message=FALSE}
+rcorr(x, type = c("pearson","spearman"))
+```
+*x* should be a matrix. The correlation type can be either *pearson* or *spearman*.
+
+**Example:**
+```{r}
+library("Hmisc")
+
+cor_2 <- rcorr(as.matrix(my_data))
+cor_2
+```
+The output of the function `rcorr()` is a list containing the following elements : 
+
+- **r** : the correlation matrix
+- **n** : the matrix of the number of observations used in analyzing each pair of variables 
+- **P** : the p-values corresponding to the significance levels of correlations.
+
+Extracting the p-values or the correlation coefficients from the output:
+```{r}
+str(cor_2)
+
+# As you can see "cor_2" is a list so extracting these values is quite simple...
+
+# p-values
+cor_2$P
+
+# Correlation matrix
+cor_2$r
+```
+
+
+## Custom function for convinient formatting of the correlation matrix
+
+This section provides a simple function for formatting a correlation matrix into a table with 4 columns containing :
+
+- Column 1 : row names (variable 1 for the correlation test)
+- Column 2 : column names (variable 2 for the correlation test)
+- Column 3 : the correlation coefficients
+- Column 4 : the p-values of the correlations
+
+```{r}
+
+flat_cor_mat <- function(cor_r, cor_p){
+  #This function provides a simple formatting of a correlation matrix
+  #into a table with 4 columns containing :
+    # Column 1 : row names (variable 1 for the correlation test)
+    # Column 2 : column names (variable 2 for the correlation test)
+    # Column 3 : the correlation coefficients
+    # Column 4 : the p-values of the correlations
+  library(tidyr)
+  library(tibble)
+  cor_r <- rownames_to_column(as.data.frame(cor_r), var = "row")
+  cor_r <- gather(cor_r, column, cor, -1)
+  cor_p <- rownames_to_column(as.data.frame(cor_p), var = "row")
+  cor_p <- gather(cor_p, column, p, -1)
+  cor_p_matrix <- left_join(cor_r, cor_p, by = c("row", "column"))
+  cor_p_matrix
+}
+
+cor_3 <- rcorr(as.matrix(mtcars[, 1:7]))
+
+my_cor_matrix <- flat_cor_mat(cor_3$r, cor_3$P)
+head(my_cor_matrix)
+```
+
+## Visualization of a correlation matrix
