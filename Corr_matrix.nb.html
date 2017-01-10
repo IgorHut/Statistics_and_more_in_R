@@ -169,16 +169,16 @@ $(document).ready(function () {
 
 <h1 class="title toc-ignore">Correlation tests and correlation matrix in R</h1>
 <h4 class="author"><em>Igor Hut</em></h4>
-<h4 class="date"><em>09 January, 2017</em></h4>
+<h4 class="date"><em>10 January, 2017</em></h4>
 
 </div>
 
 
 <!-- rnb-text-begin -->
-<p><strong>The following content is mostly based on the material that can be found at <a href="http://www.sthda.com/" class="uri">http://www.sthda.com/</a></strong></p>
+<p><strong>The following content is mostly based on the material that can be found at <a href="http://www.sthda.com/" class="uri">http://www.sthda.com/</a>, as well as in the vignette for <code>corrplot</code> R package - <a href="https://cran.r-project.org/web/packages/corrplot/vignettes/corrplot-intro.html">An Introduction to corrplot Package</a></strong></p>
 <div id="install-and-load-required-r-packages" class="section level3">
 <h3>Install and load required R packages</h3>
-<p>We’ll use the <code>ggpubr</code> R package for an easy ggplot2-based data visualization:</p>
+<p>We’ll use the <code>ggpubr</code> R package for an easy ggplot2-based data visualization and <code>corrplot</code> package to plot correlograms:</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
 <!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShnZ3B1YnIpXG5gYGAifQ== -->
@@ -233,11 +233,14 @@ cor.test(x, y, method=c(&quot;pearson&quot;, &quot;kendall&quot;, &quot;spearman
 <!-- rnb-text-begin -->
 </div>
 </div>
-<div id="examples" class="section level2">
-<h2>Examples</h2>
+<div id="preliminary-considerations" class="section level2">
+<h2>Preliminary considerations</h2>
 <p>We’ll use the well known built-in <code>mtcars</code> R dataset.</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuaGVhZChtdGNhcnMpXG5gYGAifQ== -->
+<pre class="r"><code>head(mtcars)</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbImRhdGEuZnJhbWUiXSwibmNvbCI6MTEsIm5yb3ciOjZ9LCJyZGYiOiJINHNJQUFBQUFBQUFCblZUUFd6VU1CVDI1ZTk2aVhvdG9nTXNLQ05MVDIzdUNpd1ZIazZDaFlFaTBSUHQ0a3ZTYTBUT1NSM25XanF4TURPRDJHRHV3dEtaR1daV21GbFlZQ3pZaVYvVW1QSWs1L3ZlWjMvMmUwNnlNNTRFN3NSRkNCbklORHZJTUFXMURQSG9JQXYxSko0Z1pGNFh4Qk9qTDRhRHQxQVZEZDc1TE9NTDNqcW9BZ2NmaHpKd2NQT05pTGVONzRaYUQ3aXE1WDQ3YjN5UjBnSDNGT2ExQVM5ZTFwajZiZCtlMGdGM2NUdVB2OVg0RExkOUs4TzZmc0MrNm0vcC9WZDNPLytBZTBwMzFrNi9QemhiYTN6V3IwK3Y5Mi8veGwxVm55RXlJZUhlK2VNZnIyNmRZMDg4Qk1QZVdXVnNmQnRsN2R1MDYvbmduYlR0NDJFdUR6eHE5Tkc5YWgvd0lTM3UvMnlqcm9OUFg2ZXZ2eUxxT2xkVlh6b3VYWTMvOCtubjRuL3FiSDJBTmlYenVCQkUyajBsbXZOOEJqUjhrU3BxUlVtUksyNGM1bzNLQ0FmMUdKaDFWTVFocUlzQ0dKbkQvQ3dtREhoSTJGUXJxOGV5NDhIbDBoeVllRVJPSStMdlRFWktXRzRFZjVkQTFlNlk4S0trL3QzTkRhWDBIMmFNeHR3ZitXT1dMR0tsWGxQcWt6eGpuRXl6RXVydlBpVnBRaWpYYnl0TVNRRWxnZWhHaEpQQkFSUFZpdXhDczNTem5DY1pGU1pEL3VlMlp1NHdUVmdwcWV3N1dnOFBTL3A4UFpBSFZOUDFXRmJvWE9KZWZhVHhSMjFscTYyY21NNFNDcjNhS1puRzhDNzc0bjZyNngza0xLSFF0U3ZVWXNBelRtQ2RHMllwS0ZWdjZPSXZ2NHNpUGRVRUFBQT0ifQ== -->
 <div data-pagedtable="false">
 <script data-pagedtable-source type="application/json">
@@ -352,11 +355,188 @@ ggqqplot(my_data$wt, ylab = &quot;WT&quot;)</code></pre>
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p><em>From the Q-Q normality plots, we can assume that both samples may come from populations that, closely enough, follow normal distributions.</em></p>
+<p><strong>It is important to note that if the data does not follow the normal distribution, at least closely enough, it’s recommended to use the non-parametric correlation, including Spearman and Kendall rank-based correlation tests.</strong></p>
+</div>
+</div>
+<div id="pearson-correlation-test" class="section level2">
+<h2>Pearson correlation test</h2>
+<p><strong>Example:</strong></p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucmVzIDwtIGNvci50ZXN0KG15X2RhdGEkd3QsIG15X2RhdGEkbXBnLCBtZXRob2QgPSBcInBlYXJzb25cIilcbnJlc1xuYGBgIn0= -->
+<pre class="r"><code>res &lt;- cor.test(my_data$wt, my_data$mpg, method = &quot;pearson&quot;)
+res</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG5cdFBlYXJzb24ncyBwcm9kdWN0LW1vbWVudCBjb3JyZWxhdGlvblxuXG5kYXRhOiAgbXlfZGF0YSR3dCBhbmQgbXlfZGF0YSRtcGdcbnQgPSAtOS41NTksIGRmID0gMzAsIHAtdmFsdWUgPSAxLjI5NGUtMTBcbmFsdGVybmF0aXZlIGh5cG90aGVzaXM6IHRydWUgY29ycmVsYXRpb24gaXMgbm90IGVxdWFsIHRvIDBcbjk1IHBlcmNlbnQgY29uZmlkZW5jZSBpbnRlcnZhbDpcbiAtMC45MzM4MjY0IC0wLjc0NDA4NzJcbnNhbXBsZSBlc3RpbWF0ZXM6XG4gICAgICAgY29yIFxuLTAuODY3NjU5NCBcbiJ9 -->
+<pre><code>
+    Pearson's product-moment correlation
+
+data:  my_data$wt and my_data$mpg
+t = -9.559, df = 30, p-value = 1.294e-10
+alternative hypothesis: true correlation is not equal to 0
+95 percent confidence interval:
+ -0.9338264 -0.7440872
+sample estimates:
+       cor 
+-0.8676594 </code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>So what’s happening here? First of all let’s clarify the meaning of this printout:</p>
+<ul>
+<li><code>t</code> is the <em>t-test</em> statistic value <code>(t = -9.559)</code>,</li>
+<li><code>df</code> is the degrees of freedom <code>(df= 30)</code>,</li>
+<li><code>p-value</code> is the significance level of the <em>t-test</em> <code>(p-value =</code> <span class="math inline">\(1.29410^{-10}\)</span><code>)</code>.</li>
+<li><code>conf.int</code> is the <em>confidence interval</em> of the correlation coefficient at 95% <code>(conf.int = [-0.9338, -0.7441])</code>;</li>
+<li><code>sample estimates</code> is the <em>correlation coefficient</em> <code>(Cor.coeff = -0.87)</code>.</li>
+</ul>
+<p><strong>Interpretation of the results:</strong> As can be see from the results above the <em>p-value</em> of the test is <span class="math inline">\(1.29410^{-10}\)</span>, which is less than the significance level <span class="math inline">\(\alpha = 0.05\)</span>. We can conclude that <code>wt</code> and <code>mpg</code> are significantly correlated with a correlation coefficient of -0.87 and <em>p-value</em> of <span class="math inline">\(1.29410^{-10}\)</span>.</p>
+<p><strong>Access to the values returned by <code>cor.test()</code> function</strong></p>
+<p>The function <code>cor.test()</code> returns a list containing the following components:</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc3RyKHJlcylcblxuYGBgIn0= -->
+<pre class="r"><code>str(res)
+</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiTGlzdCBvZiA5XG4gJCBzdGF0aXN0aWMgIDogTmFtZWQgbnVtIC05LjU2XG4gIC4uLSBhdHRyKCosIFwibmFtZXNcIik9IGNociBcInRcIlxuICQgcGFyYW1ldGVyICA6IE5hbWVkIGludCAzMFxuICAuLi0gYXR0cigqLCBcIm5hbWVzXCIpPSBjaHIgXCJkZlwiXG4gJCBwLnZhbHVlICAgIDogbnVtIDEuMjllLTEwXG4gJCBlc3RpbWF0ZSAgIDogTmFtZWQgbnVtIC0wLjg2OFxuICAuLi0gYXR0cigqLCBcIm5hbWVzXCIpPSBjaHIgXCJjb3JcIlxuICQgbnVsbC52YWx1ZSA6IE5hbWVkIG51bSAwXG4gIC4uLSBhdHRyKCosIFwibmFtZXNcIik9IGNociBcImNvcnJlbGF0aW9uXCJcbiAkIGFsdGVybmF0aXZlOiBjaHIgXCJ0d28uc2lkZWRcIlxuICQgbWV0aG9kICAgICA6IGNociBcIlBlYXJzb24ncyBwcm9kdWN0LW1vbWVudCBjb3JyZWxhdGlvblwiXG4gJCBkYXRhLm5hbWUgIDogY2hyIFwibXlfZGF0YSR3dCBhbmQgbXlfZGF0YSRtcGdcIlxuICQgY29uZi5pbnQgICA6IGF0b21pYyBbMToyXSAtMC45MzQgLTAuNzQ0XG4gIC4uLSBhdHRyKCosIFwiY29uZi5sZXZlbFwiKT0gbnVtIDAuOTVcbiAtIGF0dHIoKiwgXCJjbGFzc1wiKT0gY2hyIFwiaHRlc3RcIlxuIn0= -->
+<pre><code>List of 9
+ $ statistic  : Named num -9.56
+  ..- attr(*, &quot;names&quot;)= chr &quot;t&quot;
+ $ parameter  : Named int 30
+  ..- attr(*, &quot;names&quot;)= chr &quot;df&quot;
+ $ p.value    : num 1.29e-10
+ $ estimate   : Named num -0.868
+  ..- attr(*, &quot;names&quot;)= chr &quot;cor&quot;
+ $ null.value : Named num 0
+  ..- attr(*, &quot;names&quot;)= chr &quot;correlation&quot;
+ $ alternative: chr &quot;two.sided&quot;
+ $ method     : chr &quot;Pearson's product-moment correlation&quot;
+ $ data.name  : chr &quot;my_data$wt and my_data$mpg&quot;
+ $ conf.int   : atomic [1:2] -0.934 -0.744
+  ..- attr(*, &quot;conf.level&quot;)= num 0.95
+ - attr(*, &quot;class&quot;)= chr &quot;htest&quot;</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>Of these we are most interested with:</p>
+<ul>
+<li><code>p.value</code>: the p-value of the test</li>
+<li><code>estimate</code>: the correlation coefficient</li>
+</ul>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBFeHRyYWN0IHRoZSBwLnZhbHVlXG5yZXMkcC52YWx1ZVxuYGBgIn0= -->
+<pre class="r"><code># Extract the p.value
+res$p.value</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIDEuMjkzOTU5ZS0xMFxuIn0= -->
+<pre><code>[1] 1.293959e-10</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBFeHRyYWN0IHRoZSBjb3JyZWxhdGlvbiBjb2VmZmljaWVudFxucmVzJGVzdGltYXRlXG5gYGAifQ== -->
+<pre class="r"><code># Extract the correlation coefficient
+res$estimate</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiICAgICAgIGNvciBcbi0wLjg2NzY1OTQgXG4ifQ== -->
+<pre><code>       cor 
+-0.8676594 </code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+<div id="kendall-rank-correlation-test" class="section level2">
+<h2>Kendall rank correlation test</h2>
+<p><strong>The Kendall rank correlation coefficient</strong> or <strong>Kendall’s <span class="math inline">\(\tau\)</span> statistic</strong> is used to estimate a rank-based measure of association. This test may be used if the data do not necessarily come from a bivariate normal distribution.</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucmVzMiA8LSBjb3IudGVzdChteV9kYXRhJG1wZywgbXlfZGF0YSR3dCwgbWV0aG9kID0gXCJrZW5kYWxsXCIpXG5gYGAifQ== -->
+<pre class="r"><code>res2 &lt;- cor.test(my_data$mpg, my_data$wt, method = &quot;kendall&quot;)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiQ2Fubm90IGNvbXB1dGUgZXhhY3QgcC12YWx1ZSB3aXRoIHRpZXNcbiJ9 -->
+<pre><code>Cannot compute exact p-value with ties</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucmVzMlxuYGBgIn0= -->
+<pre class="r"><code>res2</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG5cdEtlbmRhbGwncyByYW5rIGNvcnJlbGF0aW9uIHRhdVxuXG5kYXRhOiAgbXlfZGF0YSRtcGcgYW5kIG15X2RhdGEkd3RcbnogPSAtNS43OTgxLCBwLXZhbHVlID0gNi43MDZlLTA5XG5hbHRlcm5hdGl2ZSBoeXBvdGhlc2lzOiB0cnVlIHRhdSBpcyBub3QgZXF1YWwgdG8gMFxuc2FtcGxlIGVzdGltYXRlczpcbiAgICAgICB0YXUgXG4tMC43Mjc4MzIxIFxuIn0= -->
+<pre><code>
+    Kendall's rank correlation tau
+
+data:  my_data$mpg and my_data$wt
+z = -5.7981, p-value = 6.706e-09
+alternative hypothesis: true tau is not equal to 0
+sample estimates:
+       tau 
+-0.7278321 </code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>Here <code>tau</code> is the Kendall correlation coefficient, so The correlation coefficient between <code>mpg</code> and <code>wy</code> is -0.7278 and the p-value is <span class="math inline">\(6.70610^{-9}\)</span>.</p>
+</div>
+<div id="spearman-rank-correlation-coefficient" class="section level2">
+<h2>Spearman rank correlation coefficient</h2>
+<p><strong>Spearman’s <span class="math inline">\(\rho\)</span> statistic</strong> is also used to estimate a rank-based measure of association. This test may be used if the data do not come from a bivariate normal distribution.</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucmVzM1xuXG5gYGAifQ== -->
+<pre class="r"><code>res3
+</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG5cdFNwZWFybWFuJ3MgcmFuayBjb3JyZWxhdGlvbiByaG9cblxuZGF0YTogIG15X2RhdGEkd3QgYW5kIG15X2RhdGEkbXBnXG5TID0gMTAyOTIsIHAtdmFsdWUgPSAxLjQ4OGUtMTFcbmFsdGVybmF0aXZlIGh5cG90aGVzaXM6IHRydWUgcmhvIGlzIG5vdCBlcXVhbCB0byAwXG5zYW1wbGUgZXN0aW1hdGVzOlxuICAgICAgcmhvIFxuLTAuODg2NDIyIFxuIn0= -->
+<pre><code>
+    Spearman's rank correlation rho
+
+data:  my_data$wt and my_data$mpg
+S = 10292, p-value = 1.488e-11
+alternative hypothesis: true rho is not equal to 0
+sample estimates:
+      rho 
+-0.886422 </code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>Here, <code>rho</code> is the Spearman’s correlation coefficient, so the correlation coefficient between <code>mpg</code> and <code>wt</code> is -0.8864 and the p-value is <span class="math inline">\(1.48810^{-11}\)</span>.</p>
+</div>
+<div id="how-to-interpret-correlation-coefficient" class="section level2">
+<h2>How to interpret correlation coefficient</h2>
+<p><strong>Value of the correlation coefficient can vary between -1 and 1:</strong></p>
+<ul>
+<li>-1 indicates a strong negative correlation : this means that every time x increases, y decreases</li>
+<li>0 means that there is no association between the two variables (x and y)</li>
+<li>1 indicates a strong positive correlation : this means that y increases with x</li>
+</ul>
+</div>
+<div id="what-is-a-correlation-matrix" class="section level2">
+<h2>What is a correlation matrix?</h2>
+<p>Previously, we described how to perform correlation test between two variables. In the following sections we’ll see how a <strong>correlation matrix</strong> can be computed and visualized. The <strong>correlation matrix</strong> is used to investigate the dependence between multiple variables at the same time. The result is a table containing the correlation coefficients between each variable and the others.</p>
+</div>
+<div id="compute-correlation-matrix-in-r" class="section level2">
+<h2>Compute correlation matrix in R</h2>
+<p>We have already mentioned the <code>cor()</code> function, at the intoductory part of this document dealing with the correlation test for a bivariate case. It be used to compute a correlation matrix. A simplified format of the function is :</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiY29yKHgsIG1ldGhvZCA9IGMoXCJwZWFyc29uXCIsIFwia2VuZGFsbFwiLCBcInNwZWFybWFuXCIpKSAifQ== -->
+<pre class="r"><code>cor(x, method = c(&quot;pearson&quot;, &quot;kendall&quot;, &quot;spearman&quot;)) </code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>Here:</p>
+<ul>
+<li><code>x</code> is numeric matrix or a data frame.</li>
+<li><code>method</code>: indicates the correlation coefficient to be computed. The default is “pearson”&quot; correlation coefficient which measures the linear dependence between two variables. As already explained “kendall” and “spearman” correlation methods are non-parametric rank-based correlation tests.</li>
+</ul>
+<p>If your data contain missing values, the following R code can be used to handle missing values by case-wise deletion:</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiY29yKHgsIG1ldGhvZCA9IFwicGVhcnNvblwiLCB1c2UgPSBcImNvbXBsZXRlLm9ic1wiKSJ9 -->
+<pre class="r"><code>cor(x, method = &quot;pearson&quot;, use = &quot;complete.obs&quot;)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 </div>
-</div>
 
-<div id="rmd-source-code">LS0tDQp0aXRsZTogIkNvcnJlbGF0aW9uIHRlc3RzIGFuZCBjb3JyZWxhdGlvbiBtYXRyaXggaW4gUiINCmF1dGhvcjogSWdvciBIdXQNCmRhdGU6ICdgciBmb3JtYXQoU3lzLnRpbWUoKSwgIiVkICVCLCAlWSIpYCcNCm91dHB1dDogaHRtbF9ub3RlYm9vaw0KLS0tDQoNCioqVGhlIGZvbGxvd2luZyBjb250ZW50IGlzIG1vc3RseSBiYXNlZCBvbiB0aGUgbWF0ZXJpYWwgdGhhdCBjYW4gYmUgZm91bmQgYXQgPGh0dHA6Ly93d3cuc3RoZGEuY29tLz4qKg0KDQoNCiMjIyBJbnN0YWxsIGFuZCBsb2FkIHJlcXVpcmVkIFIgcGFja2FnZXMNCg0KV2UnbGwgdXNlIHRoZSBgZ2dwdWJyYCBSIHBhY2thZ2UgZm9yIGFuIGVhc3kgZ2dwbG90Mi1iYXNlZCBkYXRhIHZpc3VhbGl6YXRpb246DQpgYGB7ciwgbWVzc2FnZT1GQUxTRSwgd2FybmluZz1GQUxTRX0NCmxpYnJhcnkoZ2dwdWJyKQ0KYGBgDQoNCiMjIE1ldGhvZHMgZm9yIGNvcnJlbGF0aW9uIGFuYWx5c2VzDQoNClRoZXJlIGFyZSBkaWZmZXJlbnQgbWV0aG9kcyB0byBwZXJmb3JtIGNvcnJlbGF0aW9uIGFuYWx5c2lzOg0KDQotICoqUGVhcnNvbiBjb3JyZWxhdGlvbiAocikqKiwgd2hpY2ggbWVhc3VyZXMgYSBsaW5lYXIgZGVwZW5kZW5jZSBiZXR3ZWVuIHR3byB2YXJpYWJsZXMgKHggYW5kIHkpLiBJdCdzIGFsc28ga25vd24gYXMgYSBwYXJhbWV0cmljIGNvcnJlbGF0aW9uIHRlc3QgYmVjYXVzZSBpdCBkZXBlbmRzIHRvIHRoZSBkaXN0cmlidXRpb24gb2YgdGhlIGRhdGEuIEl0IGNhbiBiZSB1c2VkIG9ubHkgd2hlbiB4IGFuZCB5IGFyZSBmcm9tIG5vcm1hbCBkaXN0cmlidXRpb24uIFRoZSBwbG90IG9mICp5ID0gZih4KSogaXMgbmFtZWQgdGhlICpsaW5lYXIgcmVncmVzc2lvbiBjdXJ2ZSouDQoNCi0gKipLZW5kYWxsICRcdGF1JCoqIGFuZCAqKlNwZWFybWFuICRccmhvJCoqLCB3aGljaCBhcmUgcmFuay1iYXNlZCBjb3JyZWxhdGlvbiBjb2VmZmljaWVudHMgKG5vbi1wYXJhbWV0cmljKQ0KDQotICoqVGhlIG1vc3QgY29tbW9ubHkgdXNlZCBtZXRob2QgaXMgdGhlIFBlYXJzb24gY29ycmVsYXRpb24gbWV0aG9kKioNCg0KIyMgQ29tcHV0ZSBjb3JyZWxhdGlvbiBpbiBSDQoNCiMjIyBSIGZ1bmN0aW9ucw0KDQpDb3JyZWxhdGlvbiBjb2VmZmljaWVudHMgY2FuIGJlIGNvbXB1dGVkIGluIFIgYnkgdXNpbmcgdGhlIGZ1bmN0aW9ucyBgY29yKClgIGFuZCBgY29yLnRlc3QoKWA6DQoNCj4gDQotIGBjb3IoKWAgY29tcHV0ZXMgdGhlIGNvcnJlbGF0aW9uIGNvZWZmaWNpZW50DQotIGBjb3IudGVzdCgpYCB0ZXN0IGZvciBhc3NvY2lhdGlvbi9jb3JyZWxhdGlvbiBiZXR3ZWVuIHBhaXJlZCBzYW1wbGVzLiBJdCByZXR1cm5zIGJvdGggdGhlIGNvcnJlbGF0aW9uIGNvZWZmaWNpZW50IGFuZCB0aGUgc2lnbmlmaWNhbmNlIGxldmVsKG9yIHAtdmFsdWUpIG9mIHRoZSBjb3JyZWxhdGlvbi4NCg0KVGhlIHNpbXBsaWZpZWQgZm9ybWF0cyBhcmU6DQpgYGB7ciwgZXZhbD1GQUxTRSwgbWVzc2FnZT1GQUxTRX0NCmNvcih4LCB5LCBtZXRob2QgPSBjKCJwZWFyc29uIiwgImtlbmRhbGwiLCAic3BlYXJtYW4iKSkNCmNvci50ZXN0KHgsIHksIG1ldGhvZD1jKCJwZWFyc29uIiwgImtlbmRhbGwiLCAic3BlYXJtYW4iKSkNCmBgYA0KDQp3aGVyZToNCg0KPiANCi0geCwgeTogbnVtZXJpYyB2ZWN0b3JzIHdpdGggdGhlIHNhbWUgbGVuZ3RoDQotIG1ldGhvZDogY29ycmVsYXRpb24gbWV0aG9kDQoNCg0KKipJZiB0aGUgZGF0YSBjb250YWluIG1pc3NpbmcgdmFsdWVzLCB0aGUgZm9sbG93aW5nIFIgY29kZSBjYW4gYmUgdXNlZCB0byBoYW5kbGUgbWlzc2luZyB2YWx1ZXMgYnkgY2FzZS13aXNlIGRlbGV0aW9uOioqDQpgYGB7ciwgZXZhbD1GQUxTRX0NCmNvcih4LCB5LCAgbWV0aG9kID0gInBlYXJzb24iLCB1c2UgPSAiY29tcGxldGUub2JzIikNCmBgYA0KDQojIyBFeGFtcGxlcw0KDQpXZSdsbCB1c2UgdGhlIHdlbGwga25vd24gYnVpbHQtaW4gYG10Y2Fyc2AgUiBkYXRhc2V0Lg0KYGBge3J9DQpoZWFkKG10Y2FycykNCmBgYA0KDQo+IFdlJ2QgbGlrZSB0byBjb21wdXRlIHRoZSBjb3JyZWxhdGlvbiBiZXR3ZWVuIGBtcGdgIGFuZCBgd3RgIHZhcmlhYmxlcy4NCg0KKipGaXJzdCBsZXQncyB2aXN1YWxpc2Ugb3VyIGRhdGEgYnkgdGhlIG1lYW5zIG9mIGEgc2NhdHRlciBwbG90LiBXZSdsbCBiZSB1c2luZyBgZ2dwdWJyYCBSIHBhY2thZ2UqKg0KDQpgYGB7cn0NCmxpYnJhcnkoZ2dwdWJyKQ0KDQpteV9kYXRhIDwtIG10Y2Fycw0KbXlfZGF0YSRjeWwgPC0gZmFjdG9yKG15X2RhdGEkY3lsKQ0Kc3RyKG15X2RhdGEpDQoNCmdnc2NhdHRlcihteV9kYXRhLCB4ID0gInd0IiwgeSA9ICJtcGciLA0KICAgICAgICAgIGFkZCA9ICJyZWcubGluZSIsIGNvbmYuaW50ID0gVFJVRSwNCiAgICAgICAgICBjb3IuY29lZiA9IFRSVUUsIGNvci5tZXRob2QgPSAicGVhcnNvbiIsDQogICAgICAgICAgeGxhYiA9ICJXZWlnaHQgKDEwMDAgbGJzKSIsIHlsYWIgPSAiTWlsZXMvIChVUykgZ2FsbG9uIikNCmBgYA0KDQojIyMgUHJlbGVtaW5hcnkgdGVzdCB0byBjaGVjayB0aGUgdGVzdCBhc3N1bXB0aW9ucw0KDQoxLiBJcyB0aGUgcmVsYXRpb24gYmV0d2VlbiB2YXJpYWJsZXMgbGluZWFyPyBZZXMsIGZyb20gdGhlIHBsb3QgYWJvdmUsIHRoZSByZWxhdGlvbnNoaXAgY2FuIGJlLCBjbG9zZWx5IGVub3VnaCwgbW9kZWxlZCBhcyBsaW5lYXIuIEluIHRoZSBzaXR1YXRpb24gd2hlcmUgdGhlIHNjYXR0ZXIgcGxvdHMgc2hvdyBjdXJ2ZWQgcGF0dGVybnMsIHdlIGFyZSBkZWFsaW5nIHdpdGggbm9ubGluZWFyIGFzc29jaWF0aW9uIGJldHdlZW4gdGhlIHR3byB2YXJpYWJsZXMuDQoNCjIuIEFyZSB0aGUgZGF0YSBmcm9tIGVhY2ggb2YgdGhlIDIgdmFyaWFibGVzICh4LCB5KSBmb2xsb3dpbmcgYSBub3JtYWwgZGlzdHJpYnV0aW9uPw0KICAgIC0gVXNlICpTaGFwaXJvLVdpbGsqIG5vcm1hbGl0eSB0ZXN0IC0+IFIgZnVuY3Rpb246IGBzaGFwaXJvLnRlc3QoKWAgDQogICAgLSBhbmQgbG9vayBhdCB0aGUgbm9ybWFsaXR5IHBsb3QgLT4gUiBmdW5jdGlvbjogYGdncHVicjo6Z2dxcXBsb3QoKWANCg0KLSAqU2hhcGlyby1XaWxrKiB0ZXN0IGNhbiBiZSBwZXJmb3JtZWQgYXMgZm9sbG93Og0KICAgIC0gTnVsbCBoeXBvdGhlc2lzOiB0aGUgZGF0YSBhcmUgbm9ybWFsbHkgZGlzdHJpYnV0ZWQNCiAgICAtIEFsdGVybmF0aXZlIGh5cG90aGVzaXM6IHRoZSBkYXRhIGFyZSBub3Qgbm9ybWFsbHkgZGlzdHJpYnV0ZWQNCiAgICANCmBgYHtyfQ0KIyBTaGFwaXJvLVdpbGsgbm9ybWFsaXR5IHRlc3QgZm9yIG1wZw0Kc2hhcGlyby50ZXN0KG15X2RhdGEkbXBnKSAjID0+IHAgPSAwLjEyMjkNCg0KIyBTaGFwaXJvLVdpbGsgbm9ybWFsaXR5IHRlc3QgZm9yIHd0DQpzaGFwaXJvLnRlc3QobXlfZGF0YSR3dCkgIyA9PiBwID0gMC4wOQ0KYGBgDQoqQXMgY2FuIGJlIHNlZW4gZnJvbSB0aGUgb3V0cHV0LCB0aGUgdHdvIHAtdmFsdWVzIGFyZSBncmVhdGVyIHRoYW4gdGhlIHByZWRldGVybWluZWQgc2lnbmlmaWNhbmNlIGxldmVsIG9mIDAuMDUgaW1wbHlpbmcgdGhhdCB0aGUgZGlzdHJpYnV0aW9uIG9mIHRoZSBkYXRhIGFyZSBub3Qgc2lnbmlmaWNhbnRseSBkaWZmZXJlbnQgZnJvbSBub3JtYWwgZGlzdHJpYnV0aW9uLiBJbiBvdGhlciB3b3Jkcywgd2UgY2FuIGFzc3VtZSB0aGUgbm9ybWFsaXR5LioNCg0KLSBPbmUgbW9yZSBvcHRpb24gZm9yIGNoZWNraW5nIHRoZSBub3JtYWxpdHkgb2YgdGhlIGRhdGEgZGlzdHJpYnV0aW9uIGlzIHZpc3VhbCBpbnNwZWN0aW9uIG9mIHRoZSBRLVEgcGxvdHMgKHF1YW50aWxlLXF1YW50aWxlIHBsb3RzKS4gUS1RIHBsb3QgZHJhd3MgdGhlIGNvcnJlbGF0aW9uIGJldHdlZW4gYSBnaXZlbiBzYW1wbGUgYW5kIHRoZSB0aGVvcmV0aWNhbCBub3JtYWwgZGlzdHJpYnV0aW9uLg0KDQpBZ2Fpbiwgd2UnbGwgdXNlIHRoZSBgZ2dwdWJyYCBSIHBhY2thZ2UgdG8gb2J0YWluICJwcmV0dHkiLCBpLmUuIHB1Ymxpc2hpbmctcmVhZHksIFEtUSBwbG90cy4NCg0KYGBge3J9DQpsaWJyYXJ5KCJnZ3B1YnIiKQ0KIyBDaGVjayBmb3IgdGhlIG5vcm1hbGl0eSBvZiAibXBnIiINCmdncXFwbG90KG15X2RhdGEkbXBnLCB5bGFiID0gIk1QRyIpDQoNCiMgQ2hlY2sgZm9yIHRoZSBub3JtYWxpdHkgb2YgInd0IiINCmdncXFwbG90KG15X2RhdGEkd3QsIHlsYWIgPSAiV1QiKQ0KYGBgDQoNCipGcm9tIHRoZSBRLVEgbm9ybWFsaXR5IHBsb3RzLCB3ZSBjYW4gYXNzdW1lIHRoYXQgYm90aCBzYW1wbGVzIG1heSBjb21lIGZyb20gcG9wdWxhdGlvbnMgdGhhdCwgY2xvc2VseSBlbm91Z2gsIGZvbGxvdyBub3JtYWwgZGlzdHJpYnV0aW9ucy4qDQo=</div>
+<div id="rmd-source-code">LS0tDQp0aXRsZTogIkNvcnJlbGF0aW9uIHRlc3RzIGFuZCBjb3JyZWxhdGlvbiBtYXRyaXggaW4gUiINCmF1dGhvcjogIklnb3IgSHV0Ig0KZGF0ZTogJ2ByIGZvcm1hdChTeXMudGltZSgpLCAiJWQgJUIsICVZIilgJw0Kb3V0cHV0Og0KICBodG1sX2RvY3VtZW50Og0KICAgIHRvYzogeWVzDQogICAgdG9jX2RlcHRoOiAzDQogIGh0bWxfbm90ZWJvb2s6IGRlZmF1bHQNCi0tLQ0KDQoqKlRoZSBmb2xsb3dpbmcgY29udGVudCBpcyBtb3N0bHkgYmFzZWQgb24gdGhlIG1hdGVyaWFsIHRoYXQgY2FuIGJlIGZvdW5kIGF0IDxodHRwOi8vd3d3LnN0aGRhLmNvbS8+LCBhcyB3ZWxsIGFzIGluIHRoZSB2aWduZXR0ZSBmb3IgYGNvcnJwbG90YCBSIHBhY2thZ2UgLSBbQW4gSW50cm9kdWN0aW9uIHRvIGNvcnJwbG90IFBhY2thZ2VdKGh0dHBzOi8vY3Jhbi5yLXByb2plY3Qub3JnL3dlYi9wYWNrYWdlcy9jb3JycGxvdC92aWduZXR0ZXMvY29ycnBsb3QtaW50cm8uaHRtbCkqKg0KDQoNCiMjIyBJbnN0YWxsIGFuZCBsb2FkIHJlcXVpcmVkIFIgcGFja2FnZXMNCg0KV2UnbGwgdXNlIHRoZSBgZ2dwdWJyYCBSIHBhY2thZ2UgZm9yIGFuIGVhc3kgZ2dwbG90Mi1iYXNlZCBkYXRhIHZpc3VhbGl6YXRpb24gYW5kIGBjb3JycGxvdGAgcGFja2FnZSB0byBwbG90IGNvcnJlbG9ncmFtczoNCmBgYHtyLCBtZXNzYWdlPUZBTFNFLCB3YXJuaW5nPUZBTFNFfQ0KbGlicmFyeShnZ3B1YnIpDQpgYGANCg0KIyMgTWV0aG9kcyBmb3IgY29ycmVsYXRpb24gYW5hbHlzZXMNCg0KVGhlcmUgYXJlIGRpZmZlcmVudCBtZXRob2RzIHRvIHBlcmZvcm0gY29ycmVsYXRpb24gYW5hbHlzaXM6DQoNCi0gKipQZWFyc29uIGNvcnJlbGF0aW9uIChyKSoqLCB3aGljaCBtZWFzdXJlcyBhIGxpbmVhciBkZXBlbmRlbmNlIGJldHdlZW4gdHdvIHZhcmlhYmxlcyAoeCBhbmQgeSkuIEl0J3MgYWxzbyBrbm93biBhcyBhIHBhcmFtZXRyaWMgY29ycmVsYXRpb24gdGVzdCBiZWNhdXNlIGl0IGRlcGVuZHMgdG8gdGhlIGRpc3RyaWJ1dGlvbiBvZiB0aGUgZGF0YS4gSXQgY2FuIGJlIHVzZWQgb25seSB3aGVuIHggYW5kIHkgYXJlIGZyb20gbm9ybWFsIGRpc3RyaWJ1dGlvbi4gVGhlIHBsb3Qgb2YgKnkgPSBmKHgpKiBpcyBuYW1lZCB0aGUgKmxpbmVhciByZWdyZXNzaW9uIGN1cnZlKi4NCg0KLSAqKktlbmRhbGwgJFx0YXUkKiogYW5kICoqU3BlYXJtYW4gJFxyaG8kKiosIHdoaWNoIGFyZSByYW5rLWJhc2VkIGNvcnJlbGF0aW9uIGNvZWZmaWNpZW50cyAobm9uLXBhcmFtZXRyaWMpDQoNCi0gKipUaGUgbW9zdCBjb21tb25seSB1c2VkIG1ldGhvZCBpcyB0aGUgUGVhcnNvbiBjb3JyZWxhdGlvbiBtZXRob2QqKg0KDQojIyBDb21wdXRlIGNvcnJlbGF0aW9uIGluIFINCg0KIyMjIFIgZnVuY3Rpb25zDQoNCkNvcnJlbGF0aW9uIGNvZWZmaWNpZW50cyBjYW4gYmUgY29tcHV0ZWQgaW4gUiBieSB1c2luZyB0aGUgZnVuY3Rpb25zIGBjb3IoKWAgYW5kIGBjb3IudGVzdCgpYDoNCg0KPiANCi0gYGNvcigpYCBjb21wdXRlcyB0aGUgY29ycmVsYXRpb24gY29lZmZpY2llbnQNCi0gYGNvci50ZXN0KClgIHRlc3QgZm9yIGFzc29jaWF0aW9uL2NvcnJlbGF0aW9uIGJldHdlZW4gcGFpcmVkIHNhbXBsZXMuIEl0IHJldHVybnMgYm90aCB0aGUgY29ycmVsYXRpb24gY29lZmZpY2llbnQgYW5kIHRoZSBzaWduaWZpY2FuY2UgbGV2ZWwob3IgcC12YWx1ZSkgb2YgdGhlIGNvcnJlbGF0aW9uLg0KDQpUaGUgc2ltcGxpZmllZCBmb3JtYXRzIGFyZToNCmBgYHtyLCBldmFsPUZBTFNFLCBtZXNzYWdlPUZBTFNFfQ0KY29yKHgsIHksIG1ldGhvZCA9IGMoInBlYXJzb24iLCAia2VuZGFsbCIsICJzcGVhcm1hbiIpKQ0KY29yLnRlc3QoeCwgeSwgbWV0aG9kPWMoInBlYXJzb24iLCAia2VuZGFsbCIsICJzcGVhcm1hbiIpKQ0KYGBgDQoNCndoZXJlOg0KDQo+IA0KLSB4LCB5OiBudW1lcmljIHZlY3RvcnMgd2l0aCB0aGUgc2FtZSBsZW5ndGgNCi0gbWV0aG9kOiBjb3JyZWxhdGlvbiBtZXRob2QNCg0KDQoqKklmIHRoZSBkYXRhIGNvbnRhaW4gbWlzc2luZyB2YWx1ZXMsIHRoZSBmb2xsb3dpbmcgUiBjb2RlIGNhbiBiZSB1c2VkIHRvIGhhbmRsZSBtaXNzaW5nIHZhbHVlcyBieSBjYXNlLXdpc2UgZGVsZXRpb246KioNCmBgYHtyLCBldmFsPUZBTFNFfQ0KY29yKHgsIHksICBtZXRob2QgPSAicGVhcnNvbiIsIHVzZSA9ICJjb21wbGV0ZS5vYnMiKQ0KYGBgDQoNCiMjIFByZWxpbWluYXJ5IGNvbnNpZGVyYXRpb25zIA0KDQpXZSdsbCB1c2UgdGhlIHdlbGwga25vd24gYnVpbHQtaW4gYG10Y2Fyc2AgUiBkYXRhc2V0Lg0KYGBge3J9DQpoZWFkKG10Y2FycykNCmBgYA0KDQo+IFdlJ2QgbGlrZSB0byBjb21wdXRlIHRoZSBjb3JyZWxhdGlvbiBiZXR3ZWVuIGBtcGdgIGFuZCBgd3RgIHZhcmlhYmxlcy4NCg0KKipGaXJzdCBsZXQncyB2aXN1YWxpc2Ugb3VyIGRhdGEgYnkgdGhlIG1lYW5zIG9mIGEgc2NhdHRlciBwbG90LiBXZSdsbCBiZSB1c2luZyBgZ2dwdWJyYCBSIHBhY2thZ2UqKg0KDQpgYGB7cn0NCmxpYnJhcnkoZ2dwdWJyKQ0KDQpteV9kYXRhIDwtIG10Y2Fycw0KbXlfZGF0YSRjeWwgPC0gZmFjdG9yKG15X2RhdGEkY3lsKQ0Kc3RyKG15X2RhdGEpDQoNCmdnc2NhdHRlcihteV9kYXRhLCB4ID0gInd0IiwgeSA9ICJtcGciLA0KICAgICAgICAgIGFkZCA9ICJyZWcubGluZSIsIGNvbmYuaW50ID0gVFJVRSwNCiAgICAgICAgICBjb3IuY29lZiA9IFRSVUUsIGNvci5tZXRob2QgPSAicGVhcnNvbiIsDQogICAgICAgICAgeGxhYiA9ICJXZWlnaHQgKDEwMDAgbGJzKSIsIHlsYWIgPSAiTWlsZXMvIChVUykgZ2FsbG9uIikNCmBgYA0KDQojIyMgUHJlbGVtaW5hcnkgdGVzdCB0byBjaGVjayB0aGUgdGVzdCBhc3N1bXB0aW9ucw0KDQoxLiBJcyB0aGUgcmVsYXRpb24gYmV0d2VlbiB2YXJpYWJsZXMgbGluZWFyPyBZZXMsIGZyb20gdGhlIHBsb3QgYWJvdmUsIHRoZSByZWxhdGlvbnNoaXAgY2FuIGJlLCBjbG9zZWx5IGVub3VnaCwgbW9kZWxlZCBhcyBsaW5lYXIuIEluIHRoZSBzaXR1YXRpb24gd2hlcmUgdGhlIHNjYXR0ZXIgcGxvdHMgc2hvdyBjdXJ2ZWQgcGF0dGVybnMsIHdlIGFyZSBkZWFsaW5nIHdpdGggbm9ubGluZWFyIGFzc29jaWF0aW9uIGJldHdlZW4gdGhlIHR3byB2YXJpYWJsZXMuDQoNCjIuIEFyZSB0aGUgZGF0YSBmcm9tIGVhY2ggb2YgdGhlIDIgdmFyaWFibGVzICh4LCB5KSBmb2xsb3dpbmcgYSBub3JtYWwgZGlzdHJpYnV0aW9uPw0KICAgIC0gVXNlICpTaGFwaXJvLVdpbGsqIG5vcm1hbGl0eSB0ZXN0IC0+IFIgZnVuY3Rpb246IGBzaGFwaXJvLnRlc3QoKWAgDQogICAgLSBhbmQgbG9vayBhdCB0aGUgbm9ybWFsaXR5IHBsb3QgLT4gUiBmdW5jdGlvbjogYGdncHVicjo6Z2dxcXBsb3QoKWANCg0KLSAqU2hhcGlyby1XaWxrKiB0ZXN0IGNhbiBiZSBwZXJmb3JtZWQgYXMgZm9sbG93Og0KICAgIC0gTnVsbCBoeXBvdGhlc2lzOiB0aGUgZGF0YSBhcmUgbm9ybWFsbHkgZGlzdHJpYnV0ZWQNCiAgICAtIEFsdGVybmF0aXZlIGh5cG90aGVzaXM6IHRoZSBkYXRhIGFyZSBub3Qgbm9ybWFsbHkgZGlzdHJpYnV0ZWQNCiAgICANCmBgYHtyfQ0KIyBTaGFwaXJvLVdpbGsgbm9ybWFsaXR5IHRlc3QgZm9yIG1wZw0Kc2hhcGlyby50ZXN0KG15X2RhdGEkbXBnKSAjID0+IHAgPSAwLjEyMjkNCg0KIyBTaGFwaXJvLVdpbGsgbm9ybWFsaXR5IHRlc3QgZm9yIHd0DQpzaGFwaXJvLnRlc3QobXlfZGF0YSR3dCkgIyA9PiBwID0gMC4wOQ0KYGBgDQoqQXMgY2FuIGJlIHNlZW4gZnJvbSB0aGUgb3V0cHV0LCB0aGUgdHdvIHAtdmFsdWVzIGFyZSBncmVhdGVyIHRoYW4gdGhlIHByZWRldGVybWluZWQgc2lnbmlmaWNhbmNlIGxldmVsIG9mIDAuMDUgaW1wbHlpbmcgdGhhdCB0aGUgZGlzdHJpYnV0aW9uIG9mIHRoZSBkYXRhIGFyZSBub3Qgc2lnbmlmaWNhbnRseSBkaWZmZXJlbnQgZnJvbSBub3JtYWwgZGlzdHJpYnV0aW9uLiBJbiBvdGhlciB3b3Jkcywgd2UgY2FuIGFzc3VtZSB0aGUgbm9ybWFsaXR5LioNCg0KLSBPbmUgbW9yZSBvcHRpb24gZm9yIGNoZWNraW5nIHRoZSBub3JtYWxpdHkgb2YgdGhlIGRhdGEgZGlzdHJpYnV0aW9uIGlzIHZpc3VhbCBpbnNwZWN0aW9uIG9mIHRoZSBRLVEgcGxvdHMgKHF1YW50aWxlLXF1YW50aWxlIHBsb3RzKS4gUS1RIHBsb3QgZHJhd3MgdGhlIGNvcnJlbGF0aW9uIGJldHdlZW4gYSBnaXZlbiBzYW1wbGUgYW5kIHRoZSB0aGVvcmV0aWNhbCBub3JtYWwgZGlzdHJpYnV0aW9uLg0KDQpBZ2Fpbiwgd2UnbGwgdXNlIHRoZSBgZ2dwdWJyYCBSIHBhY2thZ2UgdG8gb2J0YWluICJwcmV0dHkiLCBpLmUuIHB1Ymxpc2hpbmctcmVhZHksIFEtUSBwbG90cy4NCg0KYGBge3J9DQpsaWJyYXJ5KCJnZ3B1YnIiKQ0KIyBDaGVjayBmb3IgdGhlIG5vcm1hbGl0eSBvZiAibXBnIiINCmdncXFwbG90KG15X2RhdGEkbXBnLCB5bGFiID0gIk1QRyIpDQoNCiMgQ2hlY2sgZm9yIHRoZSBub3JtYWxpdHkgb2YgInd0IiINCmdncXFwbG90KG15X2RhdGEkd3QsIHlsYWIgPSAiV1QiKQ0KYGBgDQoNCipGcm9tIHRoZSBRLVEgbm9ybWFsaXR5IHBsb3RzLCB3ZSBjYW4gYXNzdW1lIHRoYXQgYm90aCBzYW1wbGVzIG1heSBjb21lIGZyb20gcG9wdWxhdGlvbnMgdGhhdCwgY2xvc2VseSBlbm91Z2gsIGZvbGxvdyBub3JtYWwgZGlzdHJpYnV0aW9ucy4qDQoNCioqSXQgaXMgaW1wb3J0YW50IHRvIG5vdGUgdGhhdCBpZiB0aGUgZGF0YSBkb2VzIG5vdCBmb2xsb3cgdGhlIG5vcm1hbCBkaXN0cmlidXRpb24sIGF0IGxlYXN0IGNsb3NlbHkgZW5vdWdoLCBpdCdzIHJlY29tbWVuZGVkIHRvIHVzZSB0aGUgbm9uLXBhcmFtZXRyaWMgY29ycmVsYXRpb24sIGluY2x1ZGluZyBTcGVhcm1hbiBhbmQgS2VuZGFsbCByYW5rLWJhc2VkIGNvcnJlbGF0aW9uIHRlc3RzLioqDQoNCiMjIFBlYXJzb24gY29ycmVsYXRpb24gdGVzdA0KDQoqKkV4YW1wbGU6KioNCg0KYGBge3J9DQpyZXMgPC0gY29yLnRlc3QobXlfZGF0YSR3dCwgbXlfZGF0YSRtcGcsIG1ldGhvZCA9ICJwZWFyc29uIikNCnJlcw0KYGBgDQoNClNvIHdoYXQncyBoYXBwZW5pbmcgaGVyZT8gRmlyc3Qgb2YgYWxsIGxldCdzIGNsYXJpZnkgdGhlIG1lYW5pbmcgb2YgdGhpcyBwcmludG91dDoNCg0KLSBgdGAgaXMgdGhlICp0LXRlc3QqIHN0YXRpc3RpYyB2YWx1ZSBgKHQgPSAtOS41NTkpYCwNCi0gYGRmYCBpcyB0aGUgZGVncmVlcyBvZiBmcmVlZG9tIGAoZGY9IDMwKWAsDQotIGBwLXZhbHVlYCBpcyB0aGUgc2lnbmlmaWNhbmNlIGxldmVsIG9mIHRoZSAqdC10ZXN0KiBgKHAtdmFsdWUgPWAgJDEuMjk0MTBeey0xMH0kYClgLg0KLSBgY29uZi5pbnRgIGlzIHRoZSAqY29uZmlkZW5jZSBpbnRlcnZhbCogb2YgdGhlIGNvcnJlbGF0aW9uIGNvZWZmaWNpZW50IGF0IDk1JSBgKGNvbmYuaW50ID0gWy0wLjkzMzgsIC0wLjc0NDFdKWA7DQotIGBzYW1wbGUgZXN0aW1hdGVzYCBpcyB0aGUgKmNvcnJlbGF0aW9uIGNvZWZmaWNpZW50KiBgKENvci5jb2VmZiA9IC0wLjg3KWAuDQoNCioqSW50ZXJwcmV0YXRpb24gb2YgdGhlIHJlc3VsdHM6KioNCkFzIGNhbiBiZSBzZWUgZnJvbSB0aGUgcmVzdWx0cyBhYm92ZSB0aGUgKnAtdmFsdWUqIG9mIHRoZSB0ZXN0IGlzICQxLjI5NDEwXnstMTB9JCwgd2hpY2ggaXMgbGVzcyB0aGFuIHRoZSBzaWduaWZpY2FuY2UgbGV2ZWwgJFxhbHBoYSA9IDAuMDUkLiBXZSBjYW4gY29uY2x1ZGUgdGhhdCBgd3RgIGFuZCBgbXBnYCBhcmUgc2lnbmlmaWNhbnRseSBjb3JyZWxhdGVkIHdpdGggYSBjb3JyZWxhdGlvbiBjb2VmZmljaWVudCBvZiAtMC44NyBhbmQgKnAtdmFsdWUqIG9mICQxLjI5NDEwXnstMTB9JC4NCg0KKipBY2Nlc3MgdG8gdGhlIHZhbHVlcyByZXR1cm5lZCBieSBgY29yLnRlc3QoKWAgZnVuY3Rpb24qKg0KDQpUaGUgZnVuY3Rpb24gYGNvci50ZXN0KClgIHJldHVybnMgYSBsaXN0IGNvbnRhaW5pbmcgdGhlIGZvbGxvd2luZyBjb21wb25lbnRzOg0KDQpgYGB7cn0NCnN0cihyZXMpDQpgYGANCk9mIHRoZXNlIHdlIGFyZSBtb3N0IGludGVyZXN0ZWQgd2l0aDoNCg0KLSBgcC52YWx1ZWA6IHRoZSBwLXZhbHVlIG9mIHRoZSB0ZXN0DQotIGBlc3RpbWF0ZWA6IHRoZSBjb3JyZWxhdGlvbiBjb2VmZmljaWVudA0KDQpgYGB7cn0NCiMgRXh0cmFjdCB0aGUgcC52YWx1ZQ0KcmVzJHAudmFsdWUNCg0KIyBFeHRyYWN0IHRoZSBjb3JyZWxhdGlvbiBjb2VmZmljaWVudA0KcmVzJGVzdGltYXRlDQpgYGANCg0KIyMgS2VuZGFsbCByYW5rIGNvcnJlbGF0aW9uIHRlc3QNCg0KKipUaGUgS2VuZGFsbCByYW5rIGNvcnJlbGF0aW9uIGNvZWZmaWNpZW50Kiogb3IgKipLZW5kYWxsJ3MgJFx0YXUkIHN0YXRpc3RpYyoqIGlzIHVzZWQgdG8gZXN0aW1hdGUgYSByYW5rLWJhc2VkIG1lYXN1cmUgb2YgYXNzb2NpYXRpb24uIFRoaXMgdGVzdCBtYXkgYmUgdXNlZCBpZiB0aGUgZGF0YSBkbyBub3QgbmVjZXNzYXJpbHkgY29tZSBmcm9tIGEgYml2YXJpYXRlIG5vcm1hbCBkaXN0cmlidXRpb24uDQoNCmBgYHtyfQ0KcmVzMiA8LSBjb3IudGVzdChteV9kYXRhJG1wZywgbXlfZGF0YSR3dCwgbWV0aG9kID0gImtlbmRhbGwiKQ0KDQpyZXMyDQpgYGANCg0KSGVyZSBgdGF1YCBpcyB0aGUgS2VuZGFsbCBjb3JyZWxhdGlvbiBjb2VmZmljaWVudCwgc28gVGhlIGNvcnJlbGF0aW9uIGNvZWZmaWNpZW50IGJldHdlZW4gYG1wZ2AgYW5kIGB3eWAgaXMgLTAuNzI3OCBhbmQgdGhlIHAtdmFsdWUgaXMgJDYuNzA2MTBeey05fSQuDQoNCiMjIFNwZWFybWFuIHJhbmsgY29ycmVsYXRpb24gY29lZmZpY2llbnQNCg0KKipTcGVhcm1hbidzICRccmhvJCBzdGF0aXN0aWMqKiBpcyBhbHNvIHVzZWQgdG8gZXN0aW1hdGUgYSByYW5rLWJhc2VkIG1lYXN1cmUgb2YgYXNzb2NpYXRpb24uIFRoaXMgdGVzdCBtYXkgYmUgdXNlZCBpZiB0aGUgZGF0YSBkbyBub3QgY29tZSBmcm9tIGEgYml2YXJpYXRlIG5vcm1hbCBkaXN0cmlidXRpb24uDQoNCmBgYHtyfQ0KcmVzMyA8LSBjb3IudGVzdChteV9kYXRhJHd0LCBteV9kYXRhJG1wZywgbWV0aG9kID0gInNwZWFybWFuIikNCg0KcmVzMw0KYGBgDQpIZXJlLCBgcmhvYCBpcyB0aGUgU3BlYXJtYW4ncyBjb3JyZWxhdGlvbiBjb2VmZmljaWVudCwgc28gdGhlIGNvcnJlbGF0aW9uIGNvZWZmaWNpZW50IGJldHdlZW4gYG1wZ2AgYW5kIGB3dGAgaXMgLTAuODg2NCBhbmQgdGhlIHAtdmFsdWUgaXMgJDEuNDg4MTBeey0xMX0kLg0KDQojIyBIb3cgdG8gaW50ZXJwcmV0IGNvcnJlbGF0aW9uIGNvZWZmaWNpZW50DQoNCioqVmFsdWUgb2YgdGhlIGNvcnJlbGF0aW9uIGNvZWZmaWNpZW50IGNhbiB2YXJ5IGJldHdlZW4gLTEgYW5kIDE6KioNCg0KLSAtMSBpbmRpY2F0ZXMgYSBzdHJvbmcgbmVnYXRpdmUgY29ycmVsYXRpb24gOiB0aGlzIG1lYW5zIHRoYXQgZXZlcnkgdGltZSB4IGluY3JlYXNlcywgeSBkZWNyZWFzZXMgDQotIDAgbWVhbnMgdGhhdCB0aGVyZSBpcyBubyBhc3NvY2lhdGlvbiBiZXR3ZWVuIHRoZSB0d28gdmFyaWFibGVzICh4IGFuZCB5KSANCi0gMSBpbmRpY2F0ZXMgYSBzdHJvbmcgcG9zaXRpdmUgY29ycmVsYXRpb24gOiB0aGlzIG1lYW5zIHRoYXQgeSBpbmNyZWFzZXMgd2l0aCB4IA0KDQoNCiMjIFdoYXQgaXMgYSBjb3JyZWxhdGlvbiBtYXRyaXg/DQoNClByZXZpb3VzbHksIHdlIGRlc2NyaWJlZCBob3cgdG8gcGVyZm9ybSBjb3JyZWxhdGlvbiB0ZXN0IGJldHdlZW4gdHdvIHZhcmlhYmxlcy4gSW4gdGhlIGZvbGxvd2luZyBzZWN0aW9ucyB3ZSdsbCBzZWUgaG93IGEgKipjb3JyZWxhdGlvbiBtYXRyaXgqKiBjYW4gYmUgY29tcHV0ZWQgYW5kIHZpc3VhbGl6ZWQuIFRoZSAqKmNvcnJlbGF0aW9uIG1hdHJpeCoqIGlzIHVzZWQgdG8gaW52ZXN0aWdhdGUgdGhlIGRlcGVuZGVuY2UgYmV0d2VlbiBtdWx0aXBsZSB2YXJpYWJsZXMgYXQgdGhlIHNhbWUgdGltZS4gVGhlIHJlc3VsdCBpcyBhIHRhYmxlIGNvbnRhaW5pbmcgdGhlIGNvcnJlbGF0aW9uIGNvZWZmaWNpZW50cyBiZXR3ZWVuIGVhY2ggdmFyaWFibGUgYW5kIHRoZSBvdGhlcnMuDQoNCiMjIENvbXB1dGUgY29ycmVsYXRpb24gbWF0cml4IGluIFINCg0KV2UgaGF2ZSBhbHJlYWR5IG1lbnRpb25lZCB0aGUgYGNvcigpYCBmdW5jdGlvbiwgYXQgdGhlIGludG9kdWN0b3J5IHBhcnQgb2YgdGhpcyBkb2N1bWVudCBkZWFsaW5nIHdpdGggdGhlIGNvcnJlbGF0aW9uIHRlc3QgZm9yIGEgYml2YXJpYXRlIGNhc2UuIEl0IGJlIHVzZWQgdG8gY29tcHV0ZSBhIGNvcnJlbGF0aW9uIG1hdHJpeC4gQSBzaW1wbGlmaWVkIGZvcm1hdCBvZiB0aGUgZnVuY3Rpb24gaXMgOg0KDQpgYGB7ciwgZXZhbD1GQUxTRSwgbWVzc2FnZT1GQUxTRX0NCmNvcih4LCBtZXRob2QgPSBjKCJwZWFyc29uIiwgImtlbmRhbGwiLCAic3BlYXJtYW4iKSkgDQpgYGANCkhlcmU6DQoNCi0gYHhgIGlzIG51bWVyaWMgbWF0cml4IG9yIGEgZGF0YSBmcmFtZS4NCi0gYG1ldGhvZGA6IGluZGljYXRlcyB0aGUgY29ycmVsYXRpb24gY29lZmZpY2llbnQgdG8gYmUgY29tcHV0ZWQuIFRoZSBkZWZhdWx0IGlzICJwZWFyc29uIiIgY29ycmVsYXRpb24gY29lZmZpY2llbnQgd2hpY2ggbWVhc3VyZXMgdGhlIGxpbmVhciBkZXBlbmRlbmNlIGJldHdlZW4gdHdvIHZhcmlhYmxlcy4gQXMgYWxyZWFkeSBleHBsYWluZWQgImtlbmRhbGwiIGFuZCAic3BlYXJtYW4iIGNvcnJlbGF0aW9uIG1ldGhvZHMgYXJlIG5vbi1wYXJhbWV0cmljIHJhbmstYmFzZWQgY29ycmVsYXRpb24gdGVzdHMuDQoNCklmIHlvdXIgZGF0YSBjb250YWluIG1pc3NpbmcgdmFsdWVzLCB0aGUgZm9sbG93aW5nIFIgY29kZSBjYW4gYmUgdXNlZCB0byBoYW5kbGUgbWlzc2luZyB2YWx1ZXMgYnkgY2FzZS13aXNlIGRlbGV0aW9uOg0KDQpgYGB7ciwgZXZhbD1GQUxTRSwgbWVzc2FnZT1GQUxTRX0NCmNvcih4LCBtZXRob2QgPSAicGVhcnNvbiIsIHVzZSA9ICJjb21wbGV0ZS5vYnMiKQ0KYGBgDQoNCg==</div>
 
 
 

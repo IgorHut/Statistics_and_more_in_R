@@ -1,16 +1,20 @@
 ---
 title: "Correlation tests and correlation matrix in R"
-author: Igor Hut
+author: "Igor Hut"
 date: '`r format(Sys.time(), "%d %B, %Y")`'
-output: html_notebook
+output:
+  html_document:
+    toc: yes
+    toc_depth: 3
+  html_notebook: default
 ---
 
-**The following content is mostly based on the material that can be found at <http://www.sthda.com/>**
+**The following content is mostly based on the material that can be found at <http://www.sthda.com/>, as well as in the vignette for `corrplot` R package - [An Introduction to corrplot Package](https://cran.r-project.org/web/packages/corrplot/vignettes/corrplot-intro.html)**
 
 
 ### Install and load required R packages
 
-We'll use the `ggpubr` R package for an easy ggplot2-based data visualization:
+We'll use the `ggpubr` R package for an easy ggplot2-based data visualization and `corrplot` package to plot correlograms:
 ```{r, message=FALSE, warning=FALSE}
 library(ggpubr)
 ```
@@ -53,7 +57,7 @@ where:
 cor(x, y,  method = "pearson", use = "complete.obs")
 ```
 
-## Examples
+## Preliminary considerations 
 
 We'll use the well known built-in `mtcars` R dataset.
 ```{r}
@@ -112,3 +116,100 @@ ggqqplot(my_data$wt, ylab = "WT")
 ```
 
 *From the Q-Q normality plots, we can assume that both samples may come from populations that, closely enough, follow normal distributions.*
+
+**It is important to note that if the data does not follow the normal distribution, at least closely enough, it's recommended to use the non-parametric correlation, including Spearman and Kendall rank-based correlation tests.**
+
+## Pearson correlation test
+
+**Example:**
+
+```{r}
+res <- cor.test(my_data$wt, my_data$mpg, method = "pearson")
+res
+```
+
+So what's happening here? First of all let's clarify the meaning of this printout:
+
+- `t` is the *t-test* statistic value `(t = -9.559)`,
+- `df` is the degrees of freedom `(df= 30)`,
+- `p-value` is the significance level of the *t-test* `(p-value =` $1.29410^{-10}$`)`.
+- `conf.int` is the *confidence interval* of the correlation coefficient at 95% `(conf.int = [-0.9338, -0.7441])`;
+- `sample estimates` is the *correlation coefficient* `(Cor.coeff = -0.87)`.
+
+**Interpretation of the results:**
+As can be see from the results above the *p-value* of the test is $1.29410^{-10}$, which is less than the significance level $\alpha = 0.05$. We can conclude that `wt` and `mpg` are significantly correlated with a correlation coefficient of -0.87 and *p-value* of $1.29410^{-10}$.
+
+**Access to the values returned by `cor.test()` function**
+
+The function `cor.test()` returns a list containing the following components:
+
+```{r}
+str(res)
+```
+Of these we are most interested with:
+
+- `p.value`: the p-value of the test
+- `estimate`: the correlation coefficient
+
+```{r}
+# Extract the p.value
+res$p.value
+
+# Extract the correlation coefficient
+res$estimate
+```
+
+## Kendall rank correlation test
+
+**The Kendall rank correlation coefficient** or **Kendall's $\tau$ statistic** is used to estimate a rank-based measure of association. This test may be used if the data do not necessarily come from a bivariate normal distribution.
+
+```{r}
+res2 <- cor.test(my_data$mpg, my_data$wt, method = "kendall")
+
+res2
+```
+
+Here `tau` is the Kendall correlation coefficient, so The correlation coefficient between `mpg` and `wy` is -0.7278 and the p-value is $6.70610^{-9}$.
+
+## Spearman rank correlation coefficient
+
+**Spearman's $\rho$ statistic** is also used to estimate a rank-based measure of association. This test may be used if the data do not come from a bivariate normal distribution.
+
+```{r}
+res3 <- cor.test(my_data$wt, my_data$mpg, method = "spearman")
+
+res3
+```
+Here, `rho` is the Spearman's correlation coefficient, so the correlation coefficient between `mpg` and `wt` is -0.8864 and the p-value is $1.48810^{-11}$.
+
+## How to interpret correlation coefficient
+
+**Value of the correlation coefficient can vary between -1 and 1:**
+
+- -1 indicates a strong negative correlation : this means that every time x increases, y decreases 
+- 0 means that there is no association between the two variables (x and y) 
+- 1 indicates a strong positive correlation : this means that y increases with x 
+
+
+## What is a correlation matrix?
+
+Previously, we described how to perform correlation test between two variables. In the following sections we'll see how a **correlation matrix** can be computed and visualized. The **correlation matrix** is used to investigate the dependence between multiple variables at the same time. The result is a table containing the correlation coefficients between each variable and the others.
+
+## Compute correlation matrix in R
+
+We have already mentioned the `cor()` function, at the intoductory part of this document dealing with the correlation test for a bivariate case. It be used to compute a correlation matrix. A simplified format of the function is :
+
+```{r, eval=FALSE, message=FALSE}
+cor(x, method = c("pearson", "kendall", "spearman")) 
+```
+Here:
+
+- `x` is numeric matrix or a data frame.
+- `method`: indicates the correlation coefficient to be computed. The default is "pearson"" correlation coefficient which measures the linear dependence between two variables. As already explained "kendall" and "spearman" correlation methods are non-parametric rank-based correlation tests.
+
+If your data contain missing values, the following R code can be used to handle missing values by case-wise deletion:
+
+```{r, eval=FALSE, message=FALSE}
+cor(x, method = "pearson", use = "complete.obs")
+```
+
