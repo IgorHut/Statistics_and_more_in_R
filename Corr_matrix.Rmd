@@ -1,27 +1,29 @@
 ---
-title: "Correlation tests and correlation matrix in R"
+title: Correlation tests, correlation matrix, and corresponding visualization methods
+  in R
 author: "Igor Hut"
 date: '`r format(Sys.time(), "%d %B, %Y")`'
 output:
+  html_document:
+    toc: yes
+    toc_depth: 4
+  html_notebook: default
   pdf_document:
     toc: yes
     toc_depth: '3'
-  html_notebook: default
-  html_document:
-    toc: yes
-    toc_depth: 3
 ---
 
-**The following content is mostly based on the material that can be found at <http://www.sthda.com/>, as well as in the vignette for `corrplot` R package - [An Introduction to corrplot Package](https://cran.r-project.org/web/packages/corrplot/vignettes/corrplot-intro.html). Since I'm a huge fan of Hadley Wickham's work I'll insist on solutions based in ["tidyverse"](https://blog.rstudio.org/2016/09/15/tidyverse-1-0-0/) whenewer possible...**
+**The following content is mostly compiled (with some original additions on my side) from the material that can be found at <http://www.sthda.com/>, as well as in the vignette for the `corrplot` R package - [An Introduction to corrplot Package](https://cran.r-project.org/web/packages/corrplot/vignettes/corrplot-intro.html). The sole purpose of this text is to put all the info into one document in an easy to search format. Since I'm a huge fan of Hadley Wickham's work I'll insist on solutions based in ["tidyverse"](https://blog.rstudio.org/2016/09/15/tidyverse-1-0-0/) whenewer possible...**
 
 
 ### Install and load required R packages
 
-We'll use the `ggpubr` R package for an easy ggplot2-based data visualization, `corrplot` package to plot correlograms, `Hmisc` to calculate correlation matrices containing both cor. coefs. and p-values, and of course `tidyverse` for all the data wrangling, plotting and alike:
+We'll use the `ggpubr` R package for an easy ggplot2-based data visualization, `corrplot` package to plot correlograms, `Hmisc` to calculate correlation matrices containing both cor. coefs. and p-values,`corrplot` for plotting correlograms, and of course `tidyverse` for all the data wrangling, plotting and alike:
 ```{r, message=FALSE, warning=FALSE}
-library(ggpubr)
-library(tidyverse)
-library(Hmisc)
+require(ggpubr)
+require(tidyverse)
+require(Hmisc)
+require(corrplot)
 ```
 
 ## Methods for correlation analyses
@@ -44,7 +46,7 @@ Correlation coefficients can be computed in R by using the functions `cor()` and
 - `cor()` computes the correlation coefficient
 - `cor.test()` test for association/correlation between paired samples. It returns both the correlation coefficient and the significance level(or p-value) of the correlation.
 
-The simplified formats are:
+*The simplified formats are:*
 ```{r, eval=FALSE, message=FALSE}
 cor(x, y, method = c("pearson", "kendall", "spearman"))
 cor.test(x, y, method=c("pearson", "kendall", "spearman"))
@@ -91,8 +93,8 @@ ggscatter(my_data, x = "wt", y = "mpg",
 1. Is the relation between variables linear? Yes, from the plot above, the relationship can be, closely enough, modeled as linear. In the situation where the scatter plots show curved patterns, we are dealing with nonlinear association between the two variables.
 
 2. Are the data from each of the 2 variables (x, y) following a normal distribution?
-    - Use *Shapiro-Wilk* normality test -> R function: `shapiro.test()` 
-    - and look at the normality plot -> R function: `ggpubr::ggqqplot()`
+    - Use *Shapiro-Wilk* normality test $\rightarrow$ R function: `shapiro.test()` 
+    - and look at the normality plot $\rightarrow$ R function: `ggpubr::ggqqplot()`
 
 - *Shapiro-Wilk* test can be performed as follow:
     - Null hypothesis: the data are normally distributed
@@ -238,7 +240,7 @@ Unfortunately, the function `cor()` returns only the correlation coefficients be
 
 The function `rcorr()` (in `Hmisc` package) can be used to compute the significance levels for pearson and spearman correlations. It returns both the *correlation coefficients* and the *p-value* of the correlation for all possible pairs of columns in the data table.
 
-**Simplified format:**
+*Simplified format:*
 ```{r, eval=FALSE, message=FALSE}
 rcorr(x, type = c("pearson","spearman"))
 ```
@@ -306,3 +308,196 @@ head(my_cor_matrix)
 ```
 
 ## Visualization of a correlation matrix
+
+There are several different ways for visualizing a correlation matrix in R software:
+
+- `symnum()` function
+- `corrplot()` function to plot a correlogram
+- scatter plots
+- heatmap
+
+We'll run trough all of these, and then go a bit more into deatil with correlograms.
+
+### Use `symnum()` function: Symbolic number coding
+
+The R function `symnum()` is used to symbolically encode a given numeric or logical vector or array. It is particularly useful for visualization of structured matrices, e.g., correlation, sparse, or logical ones. In the case of a correlatino matrix it replaces correlation coefficients by symbols according to the level of the correlation. 
+
+*Simplified format:*
+
+```{r, eval=FALSE, message=FALSE, warning=FALSE}
+symnum(x, cutpoints = c(0.3, 0.6, 0.8, 0.9, 0.95),
+       symbols = c(" ", ".", ",", "+", "*", "B"),
+       abbr.colnames = TRUE)
+```
+Here:
+
+- **x:** the correlation matrix to visualize
+- **cutpoints:** correlation coefficient cutpoints. The correlation coefficients between 0 and 0.3 are replaced by a space (" "); correlation coefficients between 0.3 and 0.6 are replaced by"."; etc .
+- **symbols:** the symbols to use.
+- **abbr.colnames:** logical value. If TRUE, colnames are abbreviated.
+
+**Example:**
+```{r}
+
+cor_4 <- cor(mtcars[1:6])
+symnum(cor_4, abbr.colnames = FALSE)
+```
+
+*As indicated in the legend, the correlation coefficients between 0 and 0.3 are replaced by a space (" "); correlation coefficients between 0.3 and 0.6 are replace by"."; etc .*
+
+### Use the `corrplot()` function: Draw a correlogram
+
+The function `corrplot()`, in the package of the same name, creates a graphical display of a correlation matrix, highlighting the most correlated variables in a data table.
+
+In this plot, correlation coefficients are colored according to the value. Correlation matrix can be also reordered according to the degree of association between variables.
+
+*The simplified format of the function is:*
+```{r, eval=FALSE, message=FALSE, warning=FALSE}
+corrplot(corr, method="circle")
+```
+Here:
+
+- **corr:** the correlation matrix to be visualized
+- **method:** The visualization method to be used, there are seven different options: "circle", "square", "ellipse", "number", "shade", "color", "pie".
+
+**Example:**
+
+```{r}
+M<-cor(mtcars)
+head(round(M,2))
+
+#Visualize the correlation matrix
+
+# method = "circle""
+corrplot(M, method = "circle")
+
+# method = "ellipse""
+corrplot(M, method = "ellipse")
+
+# method = "pie"
+corrplot(M, method = "pie")
+
+# method = "color"
+corrplot(M, method = "color")
+```
+
+*Display the **correlation coefficient**:*
+```{r}
+corrplot(M, method = "number")
+```
+
+#### Correlogram layouts:
+
+There are three general types of a correlogram layout :
+
+- **"full"** (default) : display full correlation matrix
+- **"upper"**: display upper triangular of the correlation matrix
+- **"lower"**: display lower triangular of the correlation matrix
+
+**Examples:**
+```{r}
+# upper triangular
+corrplot(M, type = "upper")
+
+#lower triangular
+corrplot(M, type = "lower")
+```
+
+#### Reordering the correlation matrix
+
+The correlation matrix can be reordered according to the correlation coefficient. This is important to identify the hidden structure and pattern in the matrix. Use `order = "hclust"` argument for hierarchical clustering of correlation coefficients.
+
+**Example:**
+```{r}
+# correlogram with hclust reordering
+corrplot(M, order = "hclust")
+
+# or exploit the symetry of the correlation matrix 
+# correlogram with hclust reordering
+corrplot(M, type = "upper", order = "hclust")
+```
+
+#### Changing the color and direction of text labels in the correlogram
+
+**Examples:**
+```{r}
+# Change background color to lightgreen and color of the circles to darkorange and steel blue
+corrplot(M, type = "upper", order = "hclust", col = c("darkorange", "steelblue"),
+         bg = "lightgreen")
+
+# use "colorRampPallete" to obtain contionus color scales
+col <- colorRampPalette(c("darkorange", "white", "steelblue"))(20)
+corrplot(M, type = "upper", order = "hclust", col = col)
+
+# Or use "RColorBrewer" package
+library(RColorBrewer)
+corrplot(M, type = "upper", order = "hclust",
+         col = brewer.pal(n = 9, name = "PuOr"), bg = "darkgreen")
+```
+
+Use the **`tl.col`** argument for defining the text label color and **`tl.srt`** for text label string rotation.
+
+**Example:**
+```{r}
+corrplot(M, type = "upper", order = "hclust", tl.col = "darkblue", tl.srt = 45)
+```
+
+#### Combining correlogram with the significance test
+
+```{r}
+# Mark the insignificant coefficients according to the specified p-value significance level
+cor_5 <- rcorr(as.matrix(mtcars))
+M <- cor_5$r
+p_mat <- cor_5$P
+corrplot(M, type = "upper", order = "hclust", 
+         p.mat = p_mat, sig.level = 0.01)
+
+# Leave blank on no significant coefficient
+corrplot(M, type = "upper", order = "hclust", 
+         p.mat = p_mat, sig.level = 0.05, insig = "blank")
+```
+
+#### Fine tuning customization of the correlogram
+
+```{r}
+col <- colorRampPalette(c("#BB4444", "#EE9988", "#FFFFFF", "#77AADD", "#4477AA"))
+corrplot(M, method = "color", col = col(200),  
+         type = "upper", order = "hclust", 
+         addCoef.col = "black", # Add coefficient of correlation
+         tl.col = "darkblue", tl.srt = 45, #Text label color and rotation
+         # Combine with significance level
+         p.mat = p_mat, sig.level = 0.01,  
+         # hide correlation coefficient on the principal diagonal
+         diag = FALSE 
+         )
+```
+
+I'd say this is more than enough for introductory exploration of correlograms. More information can be found in the, already mentioned, vignette for the `corrplot` R package - [An Introduction to corrplot Package](https://cran.r-project.org/web/packages/corrplot/vignettes/corrplot-intro.html)
+
+### Use `chart.Correlation()`: Draw scatter plots
+
+The function `chart.Correlation()` from the package "`PerformanceAnalytics`", can be used to display a chart of a correlation matrix. This is a very convinient way of exploring multivariate correlations.
+
+```{r, warning=FALSE}
+library("PerformanceAnalytics")
+my_data <- mtcars[, c(1,3,4,5,6,7)]
+chart.Correlation(my_data, histogram = TRUE, pch = 19)
+```
+
+In the above plot:
+
+- The distribution of each variable is shown on the diagonal.
+- On the bottom of the diagonal : the bivariate scatter plots with a fitted line are displayed
+- On the top of the diagonal : the value of the correlation plus the significance level as stars
+- Each significance level is associated to a symbol : p-values(0, 0.001, 0.01, 0.05, 0.1, 1) <=> symbols("***", "**", "*", ".", " ")
+
+### Use `heatmap()`
+
+I don't really consider this method of correlation matrix visualization to be of practical value, but nevertheless here is a small example:
+
+```{r}
+# Get some colors
+col <- colorRampPalette(c("darkblue", "white", "darkorange"))(20)
+M <- cor(mtcars[1:7])
+heatmap(x = M, col = col, symm = TRUE)
+```
